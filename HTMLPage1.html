@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Lab 1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style type="text/css">
+        #dates {
+            padding-top: 5px;
+            flex-direction: row;
+        }
+        #keyword_select {
+            flex-direction: row;
+        }
+
+    </style>
+</head>
+<body>
+    <span>Найти события в Нью-Йорке</span>
+    <div id="dates">
+        <span>C</span>
+        <input id="input_1" type="date" />
+        <span>По</span>
+        <input id="input_2" type="date" />
+        <span>Ключевое слово</span>
+        <select id="keyword_select">
+            <option value="">Нет</option>
+            <option value="SaltStack">SaltStack</option>
+            <option value="AWS">AWS</option>
+            <option value="Cloud">Cloud</option>
+            <option value="Docker">Docker</option>
+            <option value="Python">Python</option>
+        </select>
+        <button id="find">find</button>
+        <ul id="events">
+        </ul>
+    </div>
+
+    <script>
+        function ISODateString(d) {
+            function pad(n) { return n < 10 ? '0' + n : n }
+            return d.getUTCFullYear() + '-'
+                + pad(d.getUTCMonth() + 1) + '-'
+                + pad(d.getUTCDate()) + 'T'
+                + pad(d.getUTCHours()) + ':'
+                + pad(d.getUTCMinutes()) + ':'
+                + pad(d.getUTCSeconds()) + 'Z'
+        }
+
+        function parseData(data) {
+            var array = JSON.parse(data._embedded.events);
+            for (event of array) {
+                console.log(event);
+            }
+        }
+
+        $("#find").click(function () {
+            var date_1 = new Date(document.getElementById("input_1").value);
+            var ISODateString_1 = ISODateString(date_1);
+            var date_2 = new Date(document.getElementById("input_2").value);
+            var ISODateString_2 = ISODateString(date_2);
+            var keyword = document.getElementById("keyword_select").value;
+
+            $.getJSON("https://app.ticketmaster.com/discovery/v2/events?apikey=KTeG3fJQXXjVDWwv5SUGTqy7WCfLlSiF&size=100&sort=date,asc&city=New York&startDateTime=" + ISODateString_1 + "&endDateTime=" + ISODateString_2 + "&keyword=" + keyword, function (data) {
+                document.getElementById("events").innerHTML = "";
+                if (data.page.totalElements == 0) {
+                    document.getElementById('events').innerHTML += '<li>' + "Событий нет" + '</li>';
+                }
+                else {
+                    for (event of data._embedded.events) {
+                        document.getElementById('events').innerHTML += '<li>' + event.name + "  " + event.dates.start.localDate + "  " + event._embedded.venues[0].name + '</li>';
+                    }
+                }
+            }).fail(function (jqxhr, textStatus, error) {
+                console.log("error", textStatus);
+            })
+        });
+
+
+    </script>
+</body>
+</html >
