@@ -1,3 +1,3 @@
 # sd_lab2
 
-Software development lab1
+Software development lab2
